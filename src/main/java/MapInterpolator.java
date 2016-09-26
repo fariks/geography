@@ -1,4 +1,5 @@
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.lang.Math.*;
 import static java.lang.Math.pow;
@@ -80,7 +81,7 @@ public class MapInterpolator {
                     } else {
                         double value = calcValue(i - xMin, j - yMin);
                         res.put(currentPoint, value);
-                        A[i - xMin][j - yMin] = value;
+                        //A[i - xMin][j - yMin] = value;
                     }
                 }
             }
@@ -88,7 +89,7 @@ public class MapInterpolator {
         return res;
     }
 
-    static class Neighbor {
+    static class Neighbor implements Comparable<Neighbor> {
         double height;
         double distance;
 
@@ -96,34 +97,34 @@ public class MapInterpolator {
             this.height = height;
             this.distance = distance;
         }
+
+        @Override
+        public int compareTo(Neighbor o) {
+            //TODO improve comparison
+            return (int) (this.distance - o.distance);
+        }
     }
 
-    //fix bug with angle element
     public double calcValue(int x, int y) {
-        List<Neighbor> neighbors = new ArrayList<Neighbor>();
+        List<Neighbor> nearestNeighbors = new ArrayList<Neighbor>();
+        List<Neighbor> foundNeighbors = new ArrayList<Neighbor>();
         int k = 1;
-        int n = xMax - xMin;
-        int m = yMax - yMin;
-        while (neighbors.size() < NEIGHBORHOOD_COUNT && (k < n || k < m)) {
-            for (int i = max(0, x - k); i < min(n, x + k); i++) {
-                if (y - k >= 0 && A[i][y - k] != -1) {
-                    neighbors.add(new Neighbor(A[i][y - k], distance(x, y, i, y - k)));
-                }
-                if (y + k < m && A[i][y + k] != -1) {
-                    neighbors.add(new Neighbor(A[i][y + k], distance(x, y, i, y + k)));
-                }
-            }
-            for (int j = max(0, y - k); j < min(m, y + k); j++) {
-                if (x - k >= 0 && A[x - k][j] != -1) {
-                    neighbors.add(new Neighbor(A[x - k][j], distance(x, y, x - k, j)));
-                }
-                if (x + k < n && A[x + k][j] != -1) {
-                    neighbors.add(new Neighbor(A[x + k][j], distance(x, y, x + k, j)));
+        int xMax = A.length;
+        int yMax = A[0].length;
+        while (nearestNeighbors.size() <= NEIGHBORHOOD_COUNT && (k < xMax || k < yMax)) {
+            foundNeighbors.addAll(getNeighborsOnSquarePerimeter(x, y, k));
+            //TODO change with lambda
+            Iterator<Neighbor> iterator = foundNeighbors.iterator();
+            while (iterator.hasNext()) {
+                Neighbor neighbor = iterator.next();
+                if (neighbor.distance <= k + 1) {
+                    iterator.remove();
+                    nearestNeighbors.add(neighbor);
                 }
             }
             k++;
         }
-        return calcValueByNeighbors(neighbors);
+        return calcValueByNeighbors(nearestNeighbors.stream().sorted().limit(NEIGHBORHOOD_COUNT).collect(Collectors.<Neighbor>toList()));
     }
 
     private double distance(int x1, int y1, int x2, int y2) {
@@ -139,5 +140,51 @@ public class MapInterpolator {
             sum += weight * neighbor.height;
         }
         return sum / weigh_sum;
+    }
+
+    /**
+     * x---
+     *     |
+     *  ---|
+     *
+     * @param x
+     * @param y
+     * @param k
+     * @return
+     */
+    private List<Neighbor> getNeighborsOnSquarePerimeter(int x, int y, int k)
+    {
+        List<Neighbor> neighbors = new ArrayList<Neighbor>();
+        int xMax = A.length;
+        int yMax = A[0].length;
+        //top edge
+        for (int i = max(0, x - k + 1); i < min(xMax, x + k); i++) {
+            if (y + k < yMax && A[i][y + k] != -1)
+            {
+                neighbors.add(new Neighbor(A[i][y + k], distance(x, y, i, y + k)));
+            }
+        }
+        //right edge
+        for (int j = min(yMax, y + k - 1); j < max(0, y - k); j--) {
+            if (x + k < xMax && A[x + k][j] != -1)
+            {
+                neighbors.add(new Neighbor(A[x + k][j], distance(x, y, x + k, j)));
+            }
+        }
+        //bottom edge
+        for (int i = min(xMax, x + k - 1); i < min(0, x - k); i--) {
+            if (y - k >= 0 && A[i][y - k] != -1)
+            {
+                neighbors.add(new Neighbor(A[i][y - k], distance(x, y, i, y - k)));
+            }
+        }
+        //left edge
+        for (int j = max(0, y - k + 1); j < min(yMax, y + k); j++) {
+            if (x - k >= 0 && A[x - k][j] != -1)
+            {
+                neighbors.add(new Neighbor(A[x - k][j], distance(x, y, x - k, j)));
+            }
+        }
+        return neighbors;
     }
 }
