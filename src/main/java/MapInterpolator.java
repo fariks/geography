@@ -71,8 +71,8 @@ public class MapInterpolator {
 
     public Map<Point2D, Double> getInterpolationData() {
         Map<Point2D, Double> res = new HashMap<Point2D, Double>();
-        for (int i = xMin; i < xMax; i++) {
-            for (int j = yMin; j < yMax; j++) {
+        for (int i = xMin; i <= xMax; i++) {
+            for (int j = yMin; j <= yMax; j++) {
                 Point2D currentPoint = new Point2D(i, j);
                 if (polygon.contains(currentPoint)) {
                     Double z = zondData.get(currentPoint);
