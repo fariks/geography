@@ -16,6 +16,9 @@ public class Polygon {
     }
 
     public boolean contains(Point2D point) {
+        if (boundaryPoints.contains(point)) {
+            return true;
+        }
         boolean result = false;
         for (int i = 0, j = boundaryPoints.size() - 1; i < boundaryPoints.size(); j = i++) {
             double yi = boundaryPoints.get(i).y;
