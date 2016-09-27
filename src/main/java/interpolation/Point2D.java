@@ -1,3 +1,5 @@
+package interpolation;
+
 /**
  * Created by smirnov on 25.09.2016.
  */
@@ -39,7 +41,7 @@ public class Point2D {
 
     @Override
     public String toString() {
-        return "Point2D{" +
+        return "interpolation.Point2D{" +
                 "x=" + x +
                 ", y=" + y +
                 '}';

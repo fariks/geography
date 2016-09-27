@@ -14,40 +14,37 @@ import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
 
 import java.awt.*;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 import javax.swing.*;
 
+import interpolation.Point2D;
+import interpolation.Polygon;
+
 /**
  * Created by alsm0813 on 26.09.2016.
  */
-public class MapRenderer {
+public class GridRenderer {
 
-    public void render(Map<Point2D, Double> zondData, Map<Point2D, Double> interpolationData, Polygon polygon)
+    public void render(Map<Point2D, Double> grid, Polygon polygon)
     {
-        JFrame f = new JFrame("Interpolated Map");
-        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        ChartPanel chartPanel = new ChartPanel(createChart(createDataset(interpolationData, polygon), polygon)) {
-            @Override
-            public Dimension getPreferredSize() {
-                return new Dimension(640, 480);
-            }
-        };
-        ChartPanel chartPanelBefore = new ChartPanel(createChart(createDataset(zondData, polygon), polygon)) {
-            @Override
-            public Dimension getPreferredSize() {
-                return new Dimension(640, 480);
-            }
-        };
+        JFrame f = new JFrame("Grid");
+        double minHeight = Collections.min(grid.values(), Double::compare);
+        double maxHeight = Collections.max(grid.values(), Double::compare);
+        XYZDataset dataset = createDataset(grid);
+        JFreeChart chart = createChart(dataset, polygon, minHeight, maxHeight);
+        ChartPanel chartPanel = new ChartPanel(chart);
+        chartPanel.setPreferredSize(new Dimension(640, 480));
         chartPanel.setMouseZoomable(true, false);
         f.add(chartPanel);
-        //f.add(chartPanelBefore);
         f.pack();
         f.setLocationRelativeTo(null);
         f.setVisible(true);
     }
 
-    private static JFreeChart createChart(XYDataset dataset, Polygon polygon) {
+    private JFreeChart createChart(XYDataset dataset, Polygon polygon, double minHeight, double maxHeight) {
         NumberAxis xAxis = new NumberAxis("x Axis");
         /*xAxis.setAutoRange(false);
         xAxis.setRange(0, N);*/
@@ -56,7 +53,7 @@ public class MapRenderer {
         yAxis.setRange(0, M);*/
         XYPlot plot = new XYPlot(dataset, xAxis, yAxis, null);
         XYBlockRenderer r = new XYBlockRenderer();
-        SpectrumPaintScale ps = new SpectrumPaintScale(0, 20);
+        SpectrumPaintScale ps = new SpectrumPaintScale(minHeight, maxHeight);
         r.setPaintScale(ps);
         r.setBlockHeight(1.0f);
         r.setBlockWidth(1.0f);
@@ -83,32 +80,25 @@ public class MapRenderer {
         return chart;
     }
 
-    private static XYZDataset createDataset(Map<Point2D, Double> data, Polygon polygon) {
+    private XYZDataset createDataset(Map<Point2D, Double> data) {
         DefaultXYZDataset dataset = new DefaultXYZDataset();
-        int k = 0;
+        int i = 0;
+        double[] x = new double[data.size()];
+        double[] y = new double[data.size()];
+        double[] z = new double[data.size()];
         for (Map.Entry<Point2D, Double> point : data.entrySet())
         {
-            dataset.addSeries("Series " + k, new double[][]{{point.getKey().getX()}, {point.getKey().getY()}, {point.getValue()}});
-            k++;
+            x[i] = point.getKey().getX();
+            y[i] = point.getKey().getY();
+            z[i] = point.getValue();
+            i++;
         }
+        dataset.addSeries("Grid Series", new double[][]{x, y, z});
         return dataset;
-        /*for (int i = 0; i < N; i = i + 1) {
-            double[][] data = new double[3][M];
-            for (int j = 0; j < M; j = j + 1) {
-                data[0][j] = i;
-                data[1][j] = j;
-                data[2][j] = A[i][j];
-            }
-            //if (i==1) continue;
-            dataset.addSeries("Series" + i, data);
-        }
-        return dataset;*/
     }
 
     private static class SpectrumPaintScale implements PaintScale {
 
-        private static final float H1 = 0f;
-        private static final float H2 = 1f;
         private final double lowerBound;
         private final double upperBound;
 
@@ -129,10 +119,8 @@ public class MapRenderer {
 
         @Override
         public Paint getPaint(double value) {
-            float scaledValue = (float) (value / (getUpperBound() - getLowerBound()));
-            //float scaledH = H1 + scaledValue * (H2 - H1);
-            return new Color(0, 0, (int) (255 * value / upperBound));//Color.getHSBColor(scaledH, 1f, 1f);
+            int color = (int) (255 * (1 - value / upperBound));
+            return new Color(color, color, color);
         }
     }
-
 }

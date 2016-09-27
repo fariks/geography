@@ -1,29 +1,22 @@
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartFrame;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import java.awt.*;
-import java.awt.geom.Rectangle2D;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.List;
 
 import static java.lang.Math.*;
+
+import interpolation.NearestNeighborsGridInterpolator;
+import interpolation.Point2D;
 
 /**
  * Created by smirnov on 24.09.2016.
@@ -97,25 +90,24 @@ public class Main {
         }
         System.out.println(boundaries);
 
-        Polygon polygon = new Polygon(boundaries);
+        interpolation.Polygon polygon = new interpolation.Polygon(boundaries);
         System.out.println(polygon.contains(new Point2D(1,1)));
         System.out.println(polygon.contains(new Point2D(1,2)));
         System.out.println(polygon.contains(new Point2D(5,6)));
         System.out.println(polygon.contains(new Point2D(7,5)));
 
-        MapInterpolator interpolator = new MapInterpolator(zondData, polygon, 1);
-        System.out.println(interpolator.calcValue(5,6));
-        Map<Point2D, Double> interpolationData = interpolator.getInterpolationData();
+        NearestNeighborsGridInterpolator interpolator = new NearestNeighborsGridInterpolator();
+        Map<Point2D, Double>  interpolationData = interpolator.interpolate(zondData, polygon, 1);
         System.out.println(interpolationData);
 
-        CSVPrinter printer = new CSVPrinter(new FileWriter("src/main/resources/out.csv"), CSVFormat.DEFAULT.withDelimiter(';'));
+        /*CSVPrinter printer = new CSVPrinter(new FileWriter("src/main/resources/out.csv"), CSVFormat.DEFAULT.withDelimiter(';'));
         for (Map.Entry<Point2D, Double> entry : interpolationData.entrySet())
         {
             printer.printRecord(entry.getKey().getX(), entry.getKey().getY(), String.format("%.2f", entry.getValue()));
         }
-        printer.close();
+        printer.close();*/
 
-        new MapRenderer().render(zondData, interpolationData, polygon);
+        new GridRenderer().render(interpolationData, polygon);
     }
 
     private static XYDataset createDataset() {

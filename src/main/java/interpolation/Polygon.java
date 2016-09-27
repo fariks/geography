@@ -1,3 +1,9 @@
+package interpolation;
+
+import static com.google.common.base.Preconditions.*;
+
+import com.google.common.base.Preconditions;
+
 import java.util.List;
 
 /**
@@ -8,6 +14,7 @@ public class Polygon {
     private List<Point2D> boundaryPoints;
 
     public Polygon(List<Point2D> boundaryPoints) {
+        checkArgument(boundaryPoints.size() >= 3, "Polygon must consist at least of three points");
         this.boundaryPoints = boundaryPoints;
     }
 
