@@ -1,10 +1,13 @@
 package interpolation;
 
+import util.GeometryHelper;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.lang.Math.*;
 import static java.lang.Math.pow;
+import static util.GeometryHelper.*;
 
 /**
  * Created by smirnov on 25.09.2016.
@@ -81,10 +84,6 @@ public class NearestNeighborsGridInterpolator implements GridInterpolator {
             k++;
         }
         return calcValueByNeighbors(nearestNeighbors.stream().sorted().limit(NEIGHBORHOOD_COUNT).collect(Collectors.<Neighbor>toList()));
-    }
-
-    private double distance(int x1, int y1, int x2, int y2) {
-        return sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
     }
 
     private double calcValueByNeighbors(List<Neighbor> neighbors) {

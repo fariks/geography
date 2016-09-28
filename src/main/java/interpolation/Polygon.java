@@ -1,6 +1,8 @@
 package interpolation;
 
 import static com.google.common.base.Preconditions.*;
+import static java.lang.Math.sqrt;
+import static util.GeometryHelper.distance;
 
 import java.util.List;
 
@@ -22,8 +24,13 @@ public class Polygon {
         return boundaryPoints;
     }
 
-    public boolean contains(Point point) {
-        if (boundaryPoints.contains(point)) {
+    public boolean contains(Point test) {
+        for (int i = 0; i < boundaryPoints.size() - 1; i++) {
+            if (isPointLiesOnLineSegment(boundaryPoints.get(i), boundaryPoints.get(i + 1), test)) {
+                return true;
+            }
+        }
+        if (isPointLiesOnLineSegment(boundaryPoints.get(boundaryPoints.size() - 1), boundaryPoints.get(0), test)) {
             return true;
         }
         boolean result = false;
@@ -32,17 +39,23 @@ public class Polygon {
             double yj = boundaryPoints.get(j).y;
             double xi = boundaryPoints.get(i).x;
             double xj = boundaryPoints.get(j).x;
-            double x = point.x;
-            double y = point.y;
+            double x = test.x;
+            double y = test.y;
             boolean isBetweenYValues = (yi > y) != (yj > y);
             if (isBetweenYValues) {
                 double intersectionPoint = (xj - xi) * (y - yi) / (yj - yi) + xi;
-                if (x < intersectionPoint + EPS) {
+                if (x < intersectionPoint) {
                     result = !result;
                 }
             }
         }
         return result;
+    }
+
+    private boolean isPointLiesOnLineSegment(Point i, Point j, Point test) {
+        double mustBeZero =
+                distance(i.x, i.y, test.x, test.y) + distance(j.x, j.y, test.x, test.y) - distance(i.x, i.y, j.x, j.y);
+        return mustBeZero > -EPS && mustBeZero < EPS;
     }
 
     public double[] getBoundariesPointsAs1DArray() {
