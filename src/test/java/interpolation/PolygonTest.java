@@ -37,8 +37,7 @@ public class PolygonTest {
     @Test
     public void testContainsPointsOnConvexPolygonEdges() {
         assertTrue(convexPolygon.contains(new Point(3, 1)));
-        //TODO fix
-        //assertTrue(convexPolygon.contains(new Point(5, 2)));
+        assertTrue(convexPolygon.contains(new Point(5, 2)));
         assertTrue(convexPolygon.contains(new Point(1, 2)));
         assertTrue(convexPolygon.contains(new Point(3, 6)));
         assertTrue(convexPolygon.contains(new Point(5, 1)));
@@ -63,8 +62,7 @@ public class PolygonTest {
     @Test
     public void testContainsPointsOnNonConvexPolygonEdges() {
         assertTrue(nonConvexPolygon.contains(new Point(1, 2)));
-        //TODO fix
-        //assertTrue(nonConvexPolygon.contains(new Point(7, 3)));
+        assertTrue(nonConvexPolygon.contains(new Point(7, 3)));
         assertTrue(nonConvexPolygon.contains(new Point(7, 2)));
         assertTrue(nonConvexPolygon.contains(new Point(3, 6)));
         assertTrue(nonConvexPolygon.contains(new Point(3, 4)));

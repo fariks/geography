@@ -9,6 +9,8 @@ import java.util.List;
  */
 public class Polygon {
 
+    private static final double EPS = 0.01;
+
     private List<Point> boundaryPoints;
 
     public Polygon(List<Point> boundaryPoints) {
@@ -32,9 +34,12 @@ public class Polygon {
             double xj = boundaryPoints.get(j).x;
             double x = point.x;
             double y = point.y;
-            if (((yi > y) != (yj > y)) &&
-                    (x < (((xj - xi) * (y - yi)) / (yj - yi) + xi))) {
-                result = !result;
+            boolean isBetweenYValues = (yi > y) != (yj > y);
+            if (isBetweenYValues) {
+                double intersectionPoint = (xj - xi) * (y - yi) / (yj - yi) + xi;
+                if (x < intersectionPoint + EPS) {
+                    result = !result;
+                }
             }
         }
         return result;
