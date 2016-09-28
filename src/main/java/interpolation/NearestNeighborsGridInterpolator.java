@@ -31,6 +31,7 @@ public class NearestNeighborsGridInterpolator implements GridInterpolator {
         Map<Point, Double> interpolatedData = new HashMap<>();
         for (int i = xMin; i <= xMax; i+=h) {
             for (int j = yMin; j <= yMax; j+=h) {
+                System.out.println(String.format("Point(%d,%d)", i, j));
                 if (Thread.interrupted()) {
                     throw new InterruptedException("Grid interpolation has been interrupted");
                 }
@@ -71,8 +72,8 @@ public class NearestNeighborsGridInterpolator implements GridInterpolator {
         int xMax = workedGrid.length;
         int yMax = workedGrid[0].length;
         while (nearestNeighbors.size() <= NEIGHBORHOOD_COUNT && (k < xMax || k < yMax)) {
+            System.out.println("k=" + k);
             foundNeighbors.addAll(getNeighborsOnSquarePerimeter(workedGrid, x, y, k));
-            //TODO change with stream
             Iterator<Neighbor> iterator = foundNeighbors.iterator();
             while (iterator.hasNext()) {
                 Neighbor neighbor = iterator.next();
@@ -103,34 +104,34 @@ public class NearestNeighborsGridInterpolator implements GridInterpolator {
      *  ---|
      *
      */
-    private List<Neighbor> getNeighborsOnSquarePerimeter(double[][] workedGrid, int x, int y, int k)
+    public List<Neighbor> getNeighborsOnSquarePerimeter(double[][] workedGrid, int x, int y, int k)
     {
         List<Neighbor> neighbors = new ArrayList<Neighbor>();
-        int xMax = workedGrid.length;
-        int yMax = workedGrid[0].length;
+        int xMax = workedGrid.length - 1;
+        int yMax = workedGrid[0].length - 1;
         //top edge
-        for (int i = max(0, x - k + 1); i < min(xMax, x + k); i++) {
+        for (int i = max(0, x - k + 1); i <= min(xMax, x + k); i++) {
             if (y + k < yMax && workedGrid[i][y + k] != -1)
             {
                 neighbors.add(new Neighbor(workedGrid[i][y + k], distance(x, y, i, y + k)));
             }
         }
         //right edge
-        for (int j = min(yMax, y + k - 1); j < max(0, y - k); j--) {
+        for (int j = min(yMax, y + k - 1); j >= max(0, y - k); j--) {
             if (x + k < xMax && workedGrid[x + k][j] != -1)
             {
                 neighbors.add(new Neighbor(workedGrid[x + k][j], distance(x, y, x + k, j)));
             }
         }
         //bottom edge
-        for (int i = min(xMax, x + k - 1); i < min(0, x - k); i--) {
+        for (int i = min(xMax, x + k - 1); i >= max(0, x - k); i--) {
             if (y - k >= 0 && workedGrid[i][y - k] != -1)
             {
                 neighbors.add(new Neighbor(workedGrid[i][y - k], distance(x, y, i, y - k)));
             }
         }
         //left edge
-        for (int j = max(0, y - k + 1); j < min(yMax, y + k); j++) {
+        for (int j = max(0, y - k + 1); j <= min(yMax, y + k); j++) {
             if (x - k >= 0 && workedGrid[x - k][j] != -1)
             {
                 neighbors.add(new Neighbor(workedGrid[x - k][j], distance(x, y, x - k, j)));

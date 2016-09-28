@@ -264,6 +264,14 @@ public class GeographyGUI extends javax.swing.JFrame {
                                     "Error",
                                     JOptionPane.ERROR_MESSAGE
                             );
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            JOptionPane.showMessageDialog(
+                                    this,
+                                    e.getMessage(),
+                                    "Error",
+                                    JOptionPane.ERROR_MESSAGE
+                            );
                         } finally {
                             launchButton.setText(START);
                         }

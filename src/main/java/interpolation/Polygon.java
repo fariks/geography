@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class Polygon {
 
-    private static final double EPS = 0.01;
+    private static final double EPS = 0.0001;
 
     private List<Point> boundaryPoints;
 
@@ -25,6 +25,7 @@ public class Polygon {
     }
 
     public boolean contains(Point test) {
+        //check if point lies on polygon's edges
         for (int i = 0; i < boundaryPoints.size() - 1; i++) {
             if (isPointLiesOnLineSegment(boundaryPoints.get(i), boundaryPoints.get(i + 1), test)) {
                 return true;
@@ -33,6 +34,7 @@ public class Polygon {
         if (isPointLiesOnLineSegment(boundaryPoints.get(boundaryPoints.size() - 1), boundaryPoints.get(0), test)) {
             return true;
         }
+        //check if point lies inside polygon
         boolean result = false;
         for (int i = 0, j = boundaryPoints.size() - 1; i < boundaryPoints.size(); j = i++) {
             double yi = boundaryPoints.get(i).y;

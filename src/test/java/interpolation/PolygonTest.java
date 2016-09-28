@@ -11,11 +11,11 @@ import org.junit.Test;
 public class PolygonTest {
 
     private Polygon convexPolygon = new Polygon(
-            newArrayList(new Point(1,2), new Point(3,6), new Point(5,3), new Point(5,1), new Point(2,1))
+            newArrayList(new Point(1, 2), new Point(3, 6), new Point(5, 3), new Point(5, 1), new Point(2, 1))
     );
 
     private Polygon nonConvexPolygon = new Polygon(
-            newArrayList(new Point(1,2), new Point(3,6), new Point(7,5), new Point(7,2), new Point(3,4))
+            newArrayList(new Point(1, 2), new Point(3, 6), new Point(7, 5), new Point(7, 2), new Point(3, 4))
     );
 
     @Test
@@ -68,13 +68,26 @@ public class PolygonTest {
         assertTrue(nonConvexPolygon.contains(new Point(3, 4)));
     }
 
+    @Test
+    public void testContainsPointsOnSquareEdges() {
+        Polygon square = new Polygon(newArrayList(new Point(0, 0), new Point(0, 4), new Point(4, 4), new Point(4, 0)));
+        assertTrue(square.contains(new Point(0, 0)));
+        assertTrue(square.contains(new Point(0, 2)));
+        assertTrue(square.contains(new Point(0, 4)));
+        assertTrue(square.contains(new Point(1, 4)));
+        assertTrue(square.contains(new Point(3, 0)));
+        assertTrue(square.contains(new Point(4, 2)));
+        assertFalse(square.contains(new Point(5, 0)));
+        assertFalse(square.contains(new Point(0, 5)));
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void testTryCreatePolygonWithTwoPoints() {
-        new Polygon(newArrayList(new Point(1,2), new Point(3,6)));
+        new Polygon(newArrayList(new Point(1, 2), new Point(3, 6)));
     }
 
     @Test
     public void testTryCreatePolygonWithThreePoints() {
-        new Polygon(newArrayList(new Point(1,2), new Point(3,6), new Point(5,3)));
+        new Polygon(newArrayList(new Point(1, 2), new Point(3, 6), new Point(5, 3)));
     }
 }
