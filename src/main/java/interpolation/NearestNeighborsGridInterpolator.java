@@ -6,9 +6,6 @@ import java.util.stream.Collectors;
 import static java.lang.Math.*;
 import static java.lang.Math.pow;
 
-import interpolation.Point2D;
-import interpolation.Polygon;
-
 /**
  * Created by smirnov on 25.09.2016.
  */
@@ -19,20 +16,24 @@ public class NearestNeighborsGridInterpolator implements GridInterpolator {
     public static final int MAX_SEARCH_RADIUS = 5;
 
     @Override
-    public Map<Point2D, Double>  interpolate(Map<Point2D, Double> zondData, Polygon polygon, int h) {
-        Set<Point2D> allPoints = new HashSet<>(zondData.keySet());
-        allPoints.addAll(polygon.getBoundaryPoints());
-        int xMin = Collections.min(allPoints, (o1, o2) -> Integer.compare(o1.getX(), o2.getX())).getX();
-        int xMax = Collections.max(allPoints, (o1, o2) -> Integer.compare(o1.getX(), o2.getX())).getX();
-        int yMin = Collections.min(allPoints, (o1, o2) -> Integer.compare(o1.getY(), o2.getY())).getY();
-        int yMax = Collections.max(allPoints, (o1, o2) -> Integer.compare(o1.getY(), o2.getY())).getY();
-        double[][] workedGrid = getWorkedGrid(zondData, xMin, yMin, xMax, yMax);
-        Map<Point2D, Double> interpolatedData = new HashMap<>();
-        for (int i = xMin; i <= xMax; i++) {
-            for (int j = yMin; j <= yMax; j++) {
-                Point2D currentPoint = new Point2D(i, j);
-                if (polygon.contains(currentPoint)) {
-                    Double z = zondData.get(currentPoint);
+    public Grid interpolate(Grid initialGrid) throws InterruptedException {
+        int xMin = initialGrid.getxMin();
+        int xMax = initialGrid.getxMax();
+        int yMin = initialGrid.getyMin();
+        int yMax = initialGrid.getyMax();
+        int h = initialGrid.getGridStep();
+        Polygon boundaries = initialGrid.getBoundaries();
+        Map<Point, Double> data = initialGrid.getData();
+        double[][] workedGrid = getWorkedGrid(data, xMin, yMin, xMax, yMax);
+        Map<Point, Double> interpolatedData = new HashMap<>();
+        for (int i = xMin; i <= xMax; i+=h) {
+            for (int j = yMin; j <= yMax; j+=h) {
+                if (Thread.interrupted()) {
+                    throw new InterruptedException("Grid interpolation has been interrupted");
+                }
+                Point currentPoint = new Point(i, j);
+                if (boundaries.contains(currentPoint)) {
+                    Double z = data.get(currentPoint);
                     if (z != null) {
                         interpolatedData.put(currentPoint, z);
                     } else {
@@ -42,20 +43,20 @@ public class NearestNeighborsGridInterpolator implements GridInterpolator {
                 }
             }
         }
-        return interpolatedData;
+        return new Grid(interpolatedData, boundaries, h);
     }
 
-    private double[][] getWorkedGrid(Map<Point2D, Double> zondData, int xMin, int yMin, int xMax, int yMax) {
+    private double[][] getWorkedGrid(Map<Point, Double> probeData, int xMin, int yMin, int xMax, int yMax) {
         double[][] workedGrid = new double[xMax - xMin + 1][yMax - yMin + 1];
         for (int i = 0; i < workedGrid.length; i++) {
             for (int j = 0; j < workedGrid[0].length; j++) {
                 workedGrid[i][j] = -1;
             }
         }
-        for (Map.Entry<Point2D, Double> entry : zondData.entrySet())
+        for (Map.Entry<Point, Double> entry : probeData.entrySet())
         {
-            Point2D point2D = entry.getKey();
-            workedGrid[point2D.getX() - xMin][point2D.getY() - yMin] = entry.getValue();
+            Point point = entry.getKey();
+            workedGrid[point.getX() - xMin][point.getY() - yMin] = entry.getValue();
         }
         return workedGrid;
     }

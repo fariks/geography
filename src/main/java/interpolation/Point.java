@@ -3,11 +3,11 @@ package interpolation;
 /**
  * Created by smirnov on 25.09.2016.
  */
-public class Point2D {
+public class Point {
     protected int x;
     protected int y;
 
-    public Point2D(int x, int y) {
+    public Point(int x, int y) {
         this.x = x;
         this.y = y;
     }
@@ -25,10 +25,10 @@ public class Point2D {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Point2D point2D = (Point2D) o;
+        Point point = (Point) o;
 
-        if (x != point2D.x) return false;
-        return y == point2D.y;
+        if (x != point.x) return false;
+        return y == point.y;
 
     }
 
@@ -41,7 +41,7 @@ public class Point2D {
 
     @Override
     public String toString() {
-        return "interpolation.Point2D{" +
+        return "Point{" +
                 "x=" + x +
                 ", y=" + y +
                 '}';

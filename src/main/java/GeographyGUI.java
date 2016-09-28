@@ -4,22 +4,26 @@
  */
 
 
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-import javax.swing.JFileChooser;
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
+import interpolation.Grid;
+import interpolation.GridInterpolator;
 import interpolation.NearestNeighborsGridInterpolator;
-import interpolation.Point2D;
+import interpolation.Point;
 import interpolation.Polygon;
 
 /**
@@ -28,10 +32,22 @@ import interpolation.Polygon;
  */
 public class GeographyGUI extends javax.swing.JFrame {
 
-    /**
-     * Creates new form GeographyGUI
-     */
+    public static final String STOP = "Stop";
+    public static final String START = "Start";
+    private ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private Lock lock = new ReentrantLock();
+
+    private final GridCSVHelper gridCSVHelper;
+
+    private final GridRenderer gridRenderer;
+
+    private final GridInterpolator gridInterpolator;
+
     public GeographyGUI() {
+        Injector injector = Guice.createInjector(new GeographyModule());
+        this.gridCSVHelper = injector.getInstance(GridCSVHelper.class);
+        this.gridRenderer = injector.getInstance(GridRenderer.class);
+        this.gridInterpolator = injector.getInstance(GridInterpolator.class);
         initComponents();
     }
 
@@ -44,9 +60,9 @@ public class GeographyGUI extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        zondDataLabel = new javax.swing.JLabel();
-        zondDataTextField = new javax.swing.JTextField();
-        zondDataButton = new javax.swing.JButton();
+        probeDataLabel = new javax.swing.JLabel();
+        probeDataTextField = new javax.swing.JTextField();
+        probeDataButton = new javax.swing.JButton();
         boundariesLabel = new javax.swing.JLabel();
         boundariesTextField = new javax.swing.JTextField();
         boundariesButton = new javax.swing.JButton();
@@ -54,35 +70,42 @@ public class GeographyGUI extends javax.swing.JFrame {
         launchButton = new javax.swing.JButton();
         gridStepLabel = new javax.swing.JLabel();
         interpolationProgressBar = new javax.swing.JProgressBar();
+        interpolationProgressBar.setPreferredSize(new Dimension(250,20));
+        interpolationProgressBar.setMaximumSize(new Dimension(250,20));
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
 
-        zondDataLabel.setText("ZondData");
+        probeDataLabel.setText("Data");
 
-        zondDataTextField.setEnabled(false);
-        zondDataTextField.addActionListener(new java.awt.event.ActionListener() {
+        probeDataTextField.setEnabled(false);
+        probeDataTextField.setPreferredSize(new Dimension(300,20));
+        probeDataTextField.setMaximumSize(new Dimension(300,20));
+        probeDataTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                zondDataTextFieldActionPerformed(evt);
+                probeDataTextFieldActionPerformed(evt);
             }
         });
 
-        zondDataButton.setText("Choose");
-        zondDataButton.addActionListener(new java.awt.event.ActionListener() {
+        probeDataButton.setText("Browse");
+        probeDataButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                zondDataButtonActionPerformed(evt);
+                probeDataButtonActionPerformed(evt);
             }
         });
 
         boundariesLabel.setText("Boundaries");
 
         boundariesTextField.setEnabled(false);
+        boundariesTextField.setPreferredSize(new Dimension(300,20));
+        boundariesTextField.setMaximumSize(new Dimension(300,20));
         boundariesTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 boundariesTextFieldActionPerformed(evt);
             }
         });
 
-        boundariesButton.setText("Choose");
+        boundariesButton.setText("Browse");
         boundariesButton.setActionCommand("");
         boundariesButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -98,7 +121,7 @@ public class GeographyGUI extends javax.swing.JFrame {
             }
         });
 
-        launchButton.setText("Start");
+        launchButton.setText(START);
         launchButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 launchButtonActionPerformed(evt);
@@ -116,7 +139,7 @@ public class GeographyGUI extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(zondDataLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(probeDataLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(boundariesLabel))
                         .addGap(17, 17, 17))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
@@ -127,12 +150,12 @@ public class GeographyGUI extends javax.swing.JFrame {
                         .addComponent(gridStepTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(interpolationProgressBar, javax.swing.GroupLayout.DEFAULT_SIZE, 163, Short.MAX_VALUE))
-                    .addComponent(zondDataTextField)
+                    .addComponent(probeDataTextField)
                     .addComponent(boundariesTextField))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(boundariesButton)
-                    .addComponent(zondDataButton)
+                    .addComponent(probeDataButton)
                     .addComponent(launchButton, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(75, Short.MAX_VALUE))
         );
@@ -142,10 +165,10 @@ public class GeographyGUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE, false)
-                        .addComponent(zondDataButton, javax.swing.GroupLayout.DEFAULT_SIZE, 26, Short.MAX_VALUE)
-                        .addComponent(zondDataLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(probeDataButton, javax.swing.GroupLayout.DEFAULT_SIZE, 26, Short.MAX_VALUE)
+                        .addComponent(probeDataLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(zondDataTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(probeDataTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(3, 3, 3)))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -163,7 +186,7 @@ public class GeographyGUI extends javax.swing.JFrame {
                         .addComponent(gridStepLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(45, 45, 45))
         );
-
+        setResizable(false);
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
@@ -171,63 +194,87 @@ public class GeographyGUI extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_gridStepTextFieldActionPerformed
 
-    private void zondDataTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zondDataTextFieldActionPerformed
+    private void probeDataTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_probeDataTextFieldActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_zondDataTextFieldActionPerformed
+    }//GEN-LAST:event_probeDataTextFieldActionPerformed
 
-    private void zondDataButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_zondDataButtonActionPerformed
-        JFileChooser fileopen = new JFileChooser();
-        int ret = fileopen.showDialog(null, "Open");
+    private void probeDataButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_probeDataButtonActionPerformed
+        JFileChooser fileChooser = new JFileChooser();
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV_Files", "csv");
+        fileChooser.addChoosableFileFilter(filter);
+        fileChooser.setFileFilter(filter);
+        int ret = fileChooser.showDialog(null, "Open");
         if (ret == JFileChooser.APPROVE_OPTION) {
-            File file = fileopen.getSelectedFile();
-            zondDataTextField.setText(file.getAbsolutePath());
+            File file = fileChooser.getSelectedFile();
+            probeDataTextField.setText(file.getAbsolutePath());
         }
-    }//GEN-LAST:event_zondDataButtonActionPerformed
+    }//GEN-LAST:event_probeDataButtonActionPerformed
 
     private void boundariesTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_boundariesTextFieldActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_boundariesTextFieldActionPerformed
 
     private void boundariesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_boundariesButtonActionPerformed
-        JFileChooser fileopen = new JFileChooser();
-        int ret = fileopen.showDialog(null, "Open");
+        JFileChooser fileChooser = new JFileChooser();
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV_Files", "csv");
+        fileChooser.addChoosableFileFilter(filter);
+        fileChooser.setFileFilter(filter);
+        int ret = fileChooser.showDialog(null, "Open");
         if (ret == JFileChooser.APPROVE_OPTION) {
-            File file = fileopen.getSelectedFile();
+            File file = fileChooser.getSelectedFile();
             boundariesTextField.setText(file.getAbsolutePath());
         }
     }//GEN-LAST:event_boundariesButtonActionPerformed
 
     private void launchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_launchButtonActionPerformed
-        try {
-            Map<Point2D, Double> zondData = new HashMap<Point2D, Double>();
-            CSVParser parser = CSVParser.parse(new File(zondDataTextField.getText()), Charset.defaultCharset(), CSVFormat.DEFAULT.withDelimiter(';'));
-            for (CSVRecord csvRecord : parser) {
-                zondData.put(new Point2D(
-                                Integer.parseInt(csvRecord.get(0)),
-                                Integer.parseInt(csvRecord.get(1))
-                        ),
-                        Double.parseDouble(csvRecord.get(2))
-                );
+        if (lock.tryLock()) {
+            try {
+                if (START.equals(launchButton.getText())) {
+                    launchButton.setText(STOP);
+                    executorService.submit((Runnable) () -> {
+                        try {
+                            Map<Point, Double> probeData = gridCSVHelper.read3DGrid(probeDataTextField.getText());
+                            System.out.println(probeData);
+
+                            List<Point> boundaries = gridCSVHelper.read2DGrid(boundariesTextField.getText());
+                            System.out.println(boundaries);
+
+                            Polygon polygon = new Polygon(boundaries);
+                            int h = Integer.parseInt(gridStepTextField.getText());
+                            Grid interpolatedGrid = gridInterpolator.interpolate(new Grid(probeData, polygon, h));
+                            gridRenderer.render(interpolatedGrid);
+                        } catch (NumberFormatException e) {
+                            JOptionPane.showMessageDialog(
+                                    this,
+                                    "Grid step must be integer",
+                                    "Error",
+                                    JOptionPane.ERROR_MESSAGE
+                            );
+                        } catch (InterruptedException e) {
+                            JOptionPane.showMessageDialog(
+                                    this,
+                                    "Grid interpolation has been interrupted",
+                                    "Info",
+                                    JOptionPane.INFORMATION_MESSAGE
+                            );
+                        } catch (IOException e) {
+                            JOptionPane.showMessageDialog(
+                                    this,
+                                    "Error has occurred while trying to read csv file",
+                                    "Error",
+                                    JOptionPane.ERROR_MESSAGE
+                            );
+                        } finally {
+                            launchButton.setText(START);
+                        }
+                    });
+                } else {
+                    executorService.shutdownNow();
+                    launchButton.setText(START);
+                }
+            } finally {
+                lock.unlock();
             }
-            System.out.println(zondData);
-
-            List<Point2D> boundaries = new ArrayList<Point2D>();
-            parser = CSVParser.parse(new File(boundariesTextField.getText()), Charset.defaultCharset(), CSVFormat.DEFAULT.withDelimiter(';'));
-            for (CSVRecord csvRecord : parser) {
-                boundaries.add(new Point2D(
-                        Integer.parseInt(csvRecord.get(0)),
-                        Integer.parseInt(csvRecord.get(1))
-                ));
-            }
-            System.out.println(boundaries);
-
-            Polygon polygon = new Polygon(boundaries);
-
-            NearestNeighborsGridInterpolator interpolator = new NearestNeighborsGridInterpolator();
-            Map<Point2D, Double>  interpolationData = interpolator.interpolate(zondData, polygon, 1);
-            new GridRenderer().render(interpolationData, polygon);
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }//GEN-LAST:event_launchButtonActionPerformed
 
@@ -238,7 +285,7 @@ public class GeographyGUI extends javax.swing.JFrame {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
          */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
@@ -273,8 +320,8 @@ public class GeographyGUI extends javax.swing.JFrame {
     private javax.swing.JTextField gridStepTextField;
     private javax.swing.JProgressBar interpolationProgressBar;
     private javax.swing.JButton launchButton;
-    private javax.swing.JButton zondDataButton;
-    private javax.swing.JLabel zondDataLabel;
-    private javax.swing.JTextField zondDataTextField;
+    private javax.swing.JButton probeDataButton;
+    private javax.swing.JLabel probeDataLabel;
+    private javax.swing.JTextField probeDataTextField;
     // End of variables declaration//GEN-END:variables
 }

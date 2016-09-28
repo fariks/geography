@@ -2,8 +2,6 @@ package interpolation;
 
 import static com.google.common.base.Preconditions.*;
 
-import com.google.common.base.Preconditions;
-
 import java.util.List;
 
 /**
@@ -11,18 +9,18 @@ import java.util.List;
  */
 public class Polygon {
 
-    private List<Point2D> boundaryPoints;
+    private List<Point> boundaryPoints;
 
-    public Polygon(List<Point2D> boundaryPoints) {
+    public Polygon(List<Point> boundaryPoints) {
         checkArgument(boundaryPoints.size() >= 3, "Polygon must consist at least of three points");
         this.boundaryPoints = boundaryPoints;
     }
 
-    public List<Point2D> getBoundaryPoints() {
+    public List<Point> getBoundaryPoints() {
         return boundaryPoints;
     }
 
-    public boolean contains(Point2D point) {
+    public boolean contains(Point point) {
         if (boundaryPoints.contains(point)) {
             return true;
         }
@@ -34,20 +32,20 @@ public class Polygon {
             double xj = boundaryPoints.get(j).x;
             double x = point.x;
             double y = point.y;
-            if ((yi > y) != (yj > y) &&
-                    (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
+            if (((yi > y) != (yj > y)) &&
+                    (x < (((xj - xi) * (y - yi)) / (yj - yi) + xi))) {
                 result = !result;
             }
         }
         return result;
     }
 
-    public double[] getBoundaryPointsAs1DArray() {
+    public double[] getBoundariesPointsAs1DArray() {
         double[] res = new double[boundaryPoints.size() * 2];
         for (int i = 0; i < boundaryPoints.size(); i++) {
-            Point2D point2D = boundaryPoints.get(i);
-            res[i * 2] = point2D.getX();
-            res[i * 2 + 1] = point2D.getY();
+            Point point = boundaryPoints.get(i);
+            res[i * 2] = point.getX();
+            res[i * 2 + 1] = point.getY();
         }
         return res;
     }

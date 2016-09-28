@@ -14,37 +14,72 @@ import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
 
 import java.awt.*;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
-import interpolation.Point2D;
-import interpolation.Polygon;
+import interpolation.*;
+import interpolation.Point;
 
 /**
  * Created by alsm0813 on 26.09.2016.
  */
 public class GridRenderer {
 
-    public void render(Map<Point2D, Double> grid, Polygon polygon)
+    private GridCSVHelper gridCSVHelper = new GridCSVHelper();
+
+    public void render(Grid grid)
     {
-        JFrame f = new JFrame("Grid");
-        double minHeight = Collections.min(grid.values(), Double::compare);
-        double maxHeight = Collections.max(grid.values(), Double::compare);
-        XYZDataset dataset = createDataset(grid);
-        JFreeChart chart = createChart(dataset, polygon, minHeight, maxHeight);
+        JFrame frame = new JFrame("Grid");
+        XYZDataset dataset = createDataset(grid.getData());
+        JFreeChart chart = createChart(dataset, grid);
         ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setPreferredSize(new Dimension(640, 480));
         chartPanel.setMouseZoomable(true, false);
-        f.add(chartPanel);
-        f.pack();
-        f.setLocationRelativeTo(null);
-        f.setVisible(true);
+        addSaveAsCSVMenuItem(frame, chartPanel.getPopupMenu(), grid);
+        frame.add(chartPanel);
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
     }
 
-    private JFreeChart createChart(XYDataset dataset, Polygon polygon, double minHeight, double maxHeight) {
+    private void addSaveAsCSVMenuItem(JFrame frame, JPopupMenu popup, Grid grid) {
+        for (MenuElement element : popup.getSubElements()) {
+            System.out.println(element.getClass());
+            if (element instanceof JMenu) {
+                JMenu menu = (JMenu) element;
+                System.out.println(menu.getText());
+                if ("Save as".equals(menu.getText())) {
+                    JMenuItem csvMenuItem = new JMenuItem("CSV...");
+                    csvMenuItem.setActionCommand("SAVE_AS_CSV");
+                    csvMenuItem.addActionListener(event -> {
+                        JFileChooser fileChooser = new JFileChooser();
+                        FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV_Files", "csv");
+                        fileChooser.addChoosableFileFilter(filter);
+                        fileChooser.setFileFilter(filter);
+                        int option = fileChooser.showSaveDialog(null);
+                        if(option == JFileChooser.APPROVE_OPTION) {
+                            String filename = fileChooser.getSelectedFile().getPath();
+                            try {
+                                gridCSVHelper.write3DGrid(grid, filename);
+                            } catch (Exception e) {
+                                JOptionPane.showMessageDialog(
+                                        frame,
+                                        "Error has occurred while trying to create csv file",
+                                        "Error",
+                                        JOptionPane.ERROR_MESSAGE
+                                );
+                            }
+                        }
+                    });
+                    menu.add(csvMenuItem);
+                }
+            }
+        }
+    }
+
+    private JFreeChart createChart(XYDataset dataset, Grid grid) {
         NumberAxis xAxis = new NumberAxis("x Axis");
         /*xAxis.setAutoRange(false);
         xAxis.setRange(0, N);*/
@@ -53,13 +88,13 @@ public class GridRenderer {
         yAxis.setRange(0, M);*/
         XYPlot plot = new XYPlot(dataset, xAxis, yAxis, null);
         XYBlockRenderer r = new XYBlockRenderer();
-        SpectrumPaintScale ps = new SpectrumPaintScale(minHeight, maxHeight);
+        SpectrumPaintScale ps = new SpectrumPaintScale(grid.getzMin(), grid.getzMax());
         r.setPaintScale(ps);
-        r.setBlockHeight(1.0f);
-        r.setBlockWidth(1.0f);
+        r.setBlockHeight(grid.getGridStep());
+        r.setBlockWidth(grid.getGridStep());
         plot.setRenderer(r);
 
-        JFreeChart chart = new JFreeChart("Title",
+        JFreeChart chart = new JFreeChart("Grid",
                 JFreeChart.DEFAULT_TITLE_FONT, plot, false);
 
         NumberAxis scaleAxis = new NumberAxis("Scale");
@@ -75,18 +110,20 @@ public class GridRenderer {
         chart.addSubtitle(legend);
         chart.setBackgroundPaint(Color.white);
 
-        XYPolygonAnnotation a = new XYPolygonAnnotation(polygon.getBoundaryPointsAs1DArray(), new BasicStroke(), new Color(0, 255, 0, 255));
+        XYPolygonAnnotation a = new XYPolygonAnnotation(
+                grid.getBoundaries().getBoundariesPointsAs1DArray(), new BasicStroke(), new Color(0, 255, 0, 255)
+        );
         plot.addAnnotation(a);
         return chart;
     }
 
-    private XYZDataset createDataset(Map<Point2D, Double> data) {
+    private XYZDataset createDataset(Map<Point, Double> data) {
         DefaultXYZDataset dataset = new DefaultXYZDataset();
         int i = 0;
         double[] x = new double[data.size()];
         double[] y = new double[data.size()];
         double[] z = new double[data.size()];
-        for (Map.Entry<Point2D, Double> point : data.entrySet())
+        for (Map.Entry<interpolation.Point, Double> point : data.entrySet())
         {
             x[i] = point.getKey().getX();
             y[i] = point.getKey().getY();
