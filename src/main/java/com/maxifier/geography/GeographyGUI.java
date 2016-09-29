@@ -1,4 +1,4 @@
-/*
+package com.maxifier.geography;/*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
@@ -14,28 +14,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import interpolation.Grid;
-import interpolation.GridInterpolator;
-import interpolation.NearestNeighborsGridInterpolator;
-import interpolation.Point;
-import interpolation.Polygon;
+import com.maxifier.geography.gui.GridRenderer;
+import com.maxifier.geography.interpolation.model.Grid;
+import com.maxifier.geography.interpolation.GridInterpolator;
+import com.maxifier.geography.interpolation.model.Point;
+import com.maxifier.geography.interpolation.model.Polygon;
+import com.maxifier.geography.util.GridCSVHelper;
 
-/**
- *
- * @author alsm0813
- */
 public class GeographyGUI extends javax.swing.JFrame {
 
     public static final String STOP = "Stop";
     public static final String START = "Start";
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
     private Lock lock = new ReentrantLock();
+    private Future runningTask;
 
     private final GridCSVHelper gridCSVHelper;
 
@@ -231,7 +230,7 @@ public class GeographyGUI extends javax.swing.JFrame {
             try {
                 if (START.equals(launchButton.getText())) {
                     launchButton.setText(STOP);
-                    executorService.submit((Runnable) () -> {
+                    runningTask = executorService.submit((Runnable) () -> {
                         try {
                             Map<Point, Double> probeData = gridCSVHelper.read3DGrid(probeDataTextField.getText());
                             System.out.println(probeData);
@@ -277,7 +276,7 @@ public class GeographyGUI extends javax.swing.JFrame {
                         }
                     });
                 } else {
-                    executorService.shutdownNow();
+                    runningTask.cancel(true);
                     launchButton.setText(START);
                 }
             } finally {

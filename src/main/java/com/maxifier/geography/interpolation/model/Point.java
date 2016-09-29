@@ -1,8 +1,7 @@
-package interpolation;
+package com.maxifier.geography.interpolation.model;
 
-/**
- * Created by smirnov on 25.09.2016.
- */
+import static java.lang.Math.sqrt;
+
 public class Point {
     protected int x;
     protected int y;
@@ -18,6 +17,18 @@ public class Point {
 
     public int getY() {
         return y;
+    }
+
+    public double distance(Point point) {
+        return distance(x, y, point.x, point.y);
+    }
+
+    public static double distance(int x1, int y1, int x2, int y2) {
+        return sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+    }
+
+    public boolean isBelongsRectangle(Point min, Point max) {
+        return x >= min.x && y >= min.y && x <= max.x && y <= max.y;
     }
 
     @Override
@@ -41,9 +52,6 @@ public class Point {
 
     @Override
     public String toString() {
-        return "Point{" +
-                "x=" + x +
-                ", y=" + y +
-                '}';
+        return "(" + x + "," + y + ")";
     }
 }

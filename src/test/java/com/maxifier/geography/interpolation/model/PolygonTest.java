@@ -1,13 +1,10 @@
-package interpolation;
+package com.maxifier.geography.interpolation.model;
 
 import static com.google.common.collect.Lists.*;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-/**
- * Created by alsm0813 on 27.09.2016.
- */
 public class PolygonTest {
 
     private Polygon convexPolygon = new Polygon(

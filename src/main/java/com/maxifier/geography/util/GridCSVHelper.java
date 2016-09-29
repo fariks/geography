@@ -1,3 +1,5 @@
+package com.maxifier.geography.util;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
@@ -12,12 +14,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import interpolation.Grid;
-import interpolation.Point;
+import com.maxifier.geography.interpolation.model.Grid;
+import com.maxifier.geography.interpolation.model.Point;
 
-/**
- * Created by alsm0813 on 28.09.2016.
- */
 public class GridCSVHelper {
 
     public Map<Point, Double> read3DGrid(String fileName) throws IOException {
@@ -65,8 +64,8 @@ public class GridCSVHelper {
         try {
             printer = new CSVPrinter(new FileWriter(fileName), CSVFormat.DEFAULT.withDelimiter(';'));
             printer.printRecord(grid.getGridStep());
-            printer.printRecord(grid.getxMin());
-            printer.printRecord(grid.getyMin());
+            printer.printRecord(grid.getMin().getX());
+            printer.printRecord(grid.getMin().getY());
             for (Map.Entry<Point, Double> entry : grid.getData().entrySet())
             {
                 printer.printRecord(entry.getKey().getX(), entry.getKey().getY(), String.format("%.2f", entry.getValue()));

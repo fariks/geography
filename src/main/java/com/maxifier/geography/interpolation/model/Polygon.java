@@ -1,14 +1,9 @@
-package interpolation;
+package com.maxifier.geography.interpolation.model;
 
 import static com.google.common.base.Preconditions.*;
-import static java.lang.Math.sqrt;
-import static util.GeometryHelper.distance;
 
 import java.util.List;
 
-/**
- * Created by smirnov on 25.09.2016.
- */
 public class Polygon {
 
     private static final double EPS = 0.0001;
@@ -55,8 +50,7 @@ public class Polygon {
     }
 
     private boolean isPointLiesOnLineSegment(Point i, Point j, Point test) {
-        double mustBeZero =
-                distance(i.x, i.y, test.x, test.y) + distance(j.x, j.y, test.x, test.y) - distance(i.x, i.y, j.x, j.y);
+        double mustBeZero = test.distance(i) + test.distance(j) - i.distance(j);
         return mustBeZero > -EPS && mustBeZero < EPS;
     }
 

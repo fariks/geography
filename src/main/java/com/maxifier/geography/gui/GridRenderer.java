@@ -1,3 +1,11 @@
+package com.maxifier.geography.gui;
+
+import com.google.inject.Inject;
+
+import com.maxifier.geography.interpolation.model.Grid;
+import com.maxifier.geography.interpolation.model.Point;
+import com.maxifier.geography.util.GridCSVHelper;
+
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYPolygonAnnotation;
@@ -13,21 +21,22 @@ import org.jfree.data.xy.XYZDataset;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
 
+
 import java.awt.*;
 import java.util.Map;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import interpolation.*;
-import interpolation.Point;
 
-/**
- * Created by alsm0813 on 26.09.2016.
- */
 public class GridRenderer {
 
-    private GridCSVHelper gridCSVHelper = new GridCSVHelper();
+    private final GridCSVHelper gridCSVHelper;
+
+    @Inject
+    public GridRenderer(GridCSVHelper gridCSVHelper) {
+        this.gridCSVHelper = gridCSVHelper;
+    }
 
     public void render(Grid grid)
     {
@@ -88,7 +97,7 @@ public class GridRenderer {
         yAxis.setRange(0, M);*/
         XYPlot plot = new XYPlot(dataset, xAxis, yAxis, null);
         XYBlockRenderer r = new XYBlockRenderer();
-        SpectrumPaintScale ps = new SpectrumPaintScale(grid.getzMin(), grid.getzMax());
+        SpectrumPaintScale ps = new SpectrumPaintScale(grid.getMinHeight(), grid.getMaxHeight());
         r.setPaintScale(ps);
         r.setBlockHeight(grid.getGridStep());
         r.setBlockWidth(grid.getGridStep());
@@ -123,7 +132,7 @@ public class GridRenderer {
         double[] x = new double[data.size()];
         double[] y = new double[data.size()];
         double[] z = new double[data.size()];
-        for (Map.Entry<interpolation.Point, Double> point : data.entrySet())
+        for (Map.Entry<Point, Double> point : data.entrySet())
         {
             x[i] = point.getKey().getX();
             y[i] = point.getKey().getY();
