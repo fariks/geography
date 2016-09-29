@@ -1,5 +1,8 @@
 package com.maxifier.geography.interpolation.nearestneighbors;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 import static com.maxifier.geography.interpolation.model.Point.distance;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -11,15 +14,21 @@ import java.util.stream.Collectors;
 
 public class NearestNeighborsSearcher implements NeighborsSearcher {
 
+    private final int neighborCount;
+
+    @Inject
+    public NearestNeighborsSearcher(@Named("neighborCount") int neighborCount) {
+        this.neighborCount = neighborCount;
+    }
+
     @Override
-    public List<Neighbor> getNearestNeighbors(double[][] workedGrid, int x, int y, int neighborCount) {
+    public List<Neighbor> getNearestNeighbors(double[][] workedGrid, int x, int y) {
         List<Neighbor> nearestNeighbors = new ArrayList<>();
         List<Neighbor> foundNeighbors = new ArrayList<>();
         int k = 1;
         int xMax = workedGrid.length;
         int yMax = workedGrid[0].length;
         while (nearestNeighbors.size() < neighborCount && (k < xMax || k < yMax)) {
-            System.out.println("k=" + k);
             foundNeighbors.addAll(getNeighborsOnSquarePerimeter(workedGrid, x, y, k));
             Iterator<Neighbor> iterator = foundNeighbors.iterator();
             while (iterator.hasNext()) {

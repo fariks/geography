@@ -12,19 +12,15 @@ import com.maxifier.geography.interpolation.model.Polygon;
 
 public class NearestNeighborsGridInterpolator implements GridInterpolator {
 
-    public final int neighborhoodCount;
-
     private final NeighborsSearcher neighborsSearcher;
 
     private final ValueCalculator valueCalculator;
 
     @Inject
     public NearestNeighborsGridInterpolator(NearestNeighborsSearcher neighborsSearcher,
-                                            InverseDistanceWeightsCalculator valueCalculator,
-                                            @Named("neighborhoodCount") int neighborhoodCount) {
+                                            InverseDistanceWeightsCalculator valueCalculator) {
         this.neighborsSearcher = neighborsSearcher;
         this.valueCalculator = valueCalculator;
-        this.neighborhoodCount = neighborhoodCount;
     }
 
     @Override
@@ -83,7 +79,7 @@ public class NearestNeighborsGridInterpolator implements GridInterpolator {
 
     private double calculateValue(double[][] workedGrid, int x, int y) {
         return valueCalculator.calculateValueByNeighbors(
-                neighborsSearcher.getNearestNeighbors(workedGrid, x, y, neighborhoodCount)
+                neighborsSearcher.getNearestNeighbors(workedGrid, x, y)
         );
     }
 }

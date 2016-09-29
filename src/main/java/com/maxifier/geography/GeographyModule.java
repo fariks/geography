@@ -26,6 +26,6 @@ public class GeographyModule extends AbstractModule {
         bind(GridRenderer.class).in(Scopes.SINGLETON);
         bind(ValueCalculator.class).to(InverseDistanceWeightsCalculator.class).in(Scopes.SINGLETON);
         bind(NeighborsSearcher.class).to(NearestNeighborsSearcher.class).in(Scopes.SINGLETON);
-        bindConstant().annotatedWith(Names.named("neighborhoodCount")).to(NEIGHBOR_COUNT);
+        bindConstant().annotatedWith(Names.named("neighborCount")).to(NEIGHBOR_COUNT);
     }
 }
