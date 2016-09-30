@@ -14,8 +14,18 @@ import java.util.stream.Collectors;
 
 public class NearestNeighborsSearcher implements NeighborsSearcher {
 
+    /**
+     * Returns nearest neighbors of point with coordinates (x,y)
+     *
+     * @param workedGrid grid for search neighbors
+     * @param x x coordinate of point
+     * @param y y coordinate of point
+     * @param neighborCount count of neighbors to search
+     * @param searchRadius radius for neighbors search
+     * @return neighbors of point with coordinates (x,y)
+     */
     @Override
-    public List<Neighbor> getNearestNeighbors(double[][] workedGrid, int x, int y, int neighborCount, int searchRadius) {
+    public List<Neighbor> getNeighbors(double[][] workedGrid, int x, int y, int neighborCount, int searchRadius) {
         List<Neighbor> nearestNeighbors = new ArrayList<>();
         List<Neighbor> foundNeighbors = new ArrayList<>();
         int k = 1;
@@ -26,7 +36,7 @@ public class NearestNeighborsSearcher implements NeighborsSearcher {
             Iterator<Neighbor> iterator = foundNeighbors.iterator();
             while (iterator.hasNext()) {
                 Neighbor neighbor = iterator.next();
-                if (neighbor.getDistance() > searchRadius + EPS) {
+                if (neighbor.getDistance() > searchRadius) {
                     iterator.remove();
                     continue;
                 }
@@ -44,19 +54,19 @@ public class NearestNeighborsSearcher implements NeighborsSearcher {
     }
 
     /**
-     *
-     *
+     * Returns neighbors of point with coordinates (x,y) on square perimeter.
+     * Using following search pattern for point c starting from s and moving clockwise:
      * ∧ s - - >
      * |        |
      * |   c    |
      * |        |
      * < - - - ∨
      *
-     * @param workedGrid
-     * @param x
-     * @param y
-     * @param k
-     * @return
+     * @param workedGrid grid for search neighbors
+     * @param x x coordinate of point
+     * @param y y coordinate of point
+     * @param k half of square edge
+     * @return neighbors of point with coordinates (x,y) on square perimeter
      */
     public List<Neighbor> getNeighborsOnSquarePerimeter(double[][] workedGrid, int x, int y, int k)
     {

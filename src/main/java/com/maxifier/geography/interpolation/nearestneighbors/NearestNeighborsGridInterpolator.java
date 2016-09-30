@@ -24,6 +24,15 @@ public class NearestNeighborsGridInterpolator implements GridInterpolator {
         this.valueCalculator = valueCalculator;
     }
 
+    /**
+     * Interpolates grid by searching nearest neighbors in given radius
+     *
+     * @param initialGrid initial grid to interpolate
+     * @param neighborCount count of neighbors needed to compute value for point on grid
+     * @param searchRadius radius for neighbors search
+     * @return interpolated grid
+     * @throws InterruptedException
+     */
     @Override
     public Grid interpolate(Grid initialGrid, int neighborCount, int searchRadius) throws InterruptedException {
         Point min = initialGrid.getMin();
@@ -44,7 +53,7 @@ public class NearestNeighborsGridInterpolator implements GridInterpolator {
                     Double z = data.get(currentPoint);
                     if (z == null) {
                         List<Neighbor> neighbors =
-                                neighborsSearcher.getNearestNeighbors(workedGrid, i - min.getX(), j - min.getY(), neighborCount, searchRadius);
+                                neighborsSearcher.getNeighbors(workedGrid, i - min.getX(), j - min.getY(), neighborCount, searchRadius);
                         z = valueCalculator.calculateValueByNeighbors(neighbors);
                     }
                     interpolatedData.put(currentPoint, z);

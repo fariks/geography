@@ -6,7 +6,7 @@ import com.google.inject.name.Names;
 
 import com.maxifier.geography.gui.GridRenderer;
 import com.maxifier.geography.interpolation.GridInterpolator;
-import com.maxifier.geography.interpolation.nearestneighbors.InverseDistanceWeightsCalculator;
+import com.maxifier.geography.interpolation.nearestneighbors.InverseDistanceWeightingCalculator;
 import com.maxifier.geography.interpolation.nearestneighbors.NearestNeighborsGridInterpolator;
 import com.maxifier.geography.interpolation.nearestneighbors.NearestNeighborsSearcher;
 import com.maxifier.geography.interpolation.nearestneighbors.NeighborsSearcher;
@@ -24,7 +24,7 @@ public class GeographyModule extends AbstractModule {
         bind(GridInterpolator.class).to(NearestNeighborsGridInterpolator.class).in(Scopes.SINGLETON);
         bind(GridCSVHelper.class).in(Scopes.SINGLETON);
         bind(GridRenderer.class).in(Scopes.SINGLETON);
-        bind(ValueCalculator.class).to(InverseDistanceWeightsCalculator.class).in(Scopes.SINGLETON);
+        bind(ValueCalculator.class).to(InverseDistanceWeightingCalculator.class).in(Scopes.SINGLETON);
         bind(NeighborsSearcher.class).to(NearestNeighborsSearcher.class).in(Scopes.SINGLETON);
         bindConstant().annotatedWith(Names.named("neighborCount")).to(NEIGHBOR_COUNT);
     }

@@ -4,12 +4,14 @@ import static java.lang.Math.pow;
 
 import java.util.List;
 
-public class InverseDistanceWeightsCalculator implements ValueCalculator {
+public class InverseDistanceWeightingCalculator implements ValueCalculator {
 
     /**
+     * Calculates value by given neighbors using inverse distance weighting algorithm
+     * https://en.wikipedia.org/wiki/Inverse_distance_weighting
      *
-     * @param neighbors
-     * @return
+     * @param neighbors given neighbors
+     * @return calculated value
      */
     @Override
     public double calculateValueByNeighbors(List<Neighbor> neighbors) {

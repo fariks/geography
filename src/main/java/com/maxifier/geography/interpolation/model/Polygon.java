@@ -1,12 +1,13 @@
 package com.maxifier.geography.interpolation.model;
 
+import com.maxifier.geography.GeographyModule;
+
 import static com.google.common.base.Preconditions.*;
+import static com.maxifier.geography.GeographyModule.*;
 
 import java.util.List;
 
 public class Polygon {
-
-    private static final double EPS = 0.0001;
 
     private List<Point> boundaryPoints;
 
@@ -19,6 +20,13 @@ public class Polygon {
         return boundaryPoints;
     }
 
+    /**
+     * Checks if point lies inside polygon using ray casting algorithm
+     * https://en.wikipedia.org/wiki/Point_in_polygon
+     *
+     * @param test point to check
+     * @return true if point lies inside polygon
+     */
     public boolean contains(Point test) {
         //check if point lies on polygon's edges
         for (int i = 0; i < boundaryPoints.size() - 1; i++) {

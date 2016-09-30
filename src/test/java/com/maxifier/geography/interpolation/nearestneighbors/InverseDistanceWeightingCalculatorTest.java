@@ -11,7 +11,7 @@ import com.maxifier.geography.GeographyModule;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class InverseDistanceWeightsCalculatorTest {
+public class InverseDistanceWeightingCalculatorTest {
 
     private Injector injector = Guice.createInjector(new GeographyModule());
     private ValueCalculator valueCalculator = injector.getInstance(ValueCalculator.class);
