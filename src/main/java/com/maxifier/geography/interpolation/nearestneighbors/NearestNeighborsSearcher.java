@@ -1,11 +1,11 @@
 package com.maxifier.geography.interpolation.nearestneighbors;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
-
+import static com.maxifier.geography.GeographyModule.*;
 import static com.maxifier.geography.interpolation.model.Point.distance;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
+
+import com.maxifier.geography.GeographyModule;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -14,25 +14,22 @@ import java.util.stream.Collectors;
 
 public class NearestNeighborsSearcher implements NeighborsSearcher {
 
-    private final int neighborCount;
-
-    @Inject
-    public NearestNeighborsSearcher(@Named("neighborCount") int neighborCount) {
-        this.neighborCount = neighborCount;
-    }
-
     @Override
-    public List<Neighbor> getNearestNeighbors(double[][] workedGrid, int x, int y) {
+    public List<Neighbor> getNearestNeighbors(double[][] workedGrid, int x, int y, int neighborCount, int searchRadius) {
         List<Neighbor> nearestNeighbors = new ArrayList<>();
         List<Neighbor> foundNeighbors = new ArrayList<>();
         int k = 1;
         int xMax = workedGrid.length;
         int yMax = workedGrid[0].length;
-        while (nearestNeighbors.size() < neighborCount && (k < xMax || k < yMax)) {
+        while (nearestNeighbors.size() < neighborCount && k <= searchRadius && (k < xMax || k < yMax)) {
             foundNeighbors.addAll(getNeighborsOnSquarePerimeter(workedGrid, x, y, k));
             Iterator<Neighbor> iterator = foundNeighbors.iterator();
             while (iterator.hasNext()) {
                 Neighbor neighbor = iterator.next();
+                if (neighbor.getDistance() > searchRadius + EPS) {
+                    iterator.remove();
+                    continue;
+                }
                 if (neighbor.getDistance() <= k + 1) {
                     iterator.remove();
                     nearestNeighbors.add(neighbor);
@@ -68,14 +65,14 @@ public class NearestNeighborsSearcher implements NeighborsSearcher {
         int yMax = workedGrid[0].length - 1;
         //top edge
         for (int i = max(0, x - k + 1); i <= min(xMax, x + k); i++) {
-            if (y + k < yMax && workedGrid[i][y + k] != -1)
+            if (y + k <= yMax && workedGrid[i][y + k] != -1)
             {
                 neighbors.add(new Neighbor(workedGrid[i][y + k], distance(x, y, i, y + k)));
             }
         }
         //right edge
         for (int j = min(yMax, y + k - 1); j >= max(0, y - k); j--) {
-            if (x + k < xMax && workedGrid[x + k][j] != -1)
+            if (x + k <= xMax && workedGrid[x + k][j] != -1)
             {
                 neighbors.add(new Neighbor(workedGrid[x + k][j], distance(x, y, x + k, j)));
             }

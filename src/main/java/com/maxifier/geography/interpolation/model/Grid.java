@@ -5,21 +5,23 @@ import java.util.Map;
 
 public class Grid {
 
-    private Map<Point, Double> data;
+    private final Map<Point, Double> data;
 
-    private Polygon boundaries;
+    private final Polygon boundaries;
 
-    private int gridStep;
+    private final int xStep;
+    private final int yStep;
 
     private Point min;
     private Point max;
     private Double minHeight;
     private Double maxHeight;
 
-    public Grid(Map<Point, Double> data, Polygon boundaries, int gridStep) {
+    public Grid(Map<Point, Double> data, Polygon boundaries, int xStep, int yStep) {
         this.data = data;
         this.boundaries = boundaries;
-        this.gridStep = gridStep;
+        this.xStep = xStep;
+        this.yStep = yStep;
     }
 
     public Map<Point, Double> getData() {
@@ -30,8 +32,12 @@ public class Grid {
         return boundaries;
     }
 
-    public int getGridStep() {
-        return gridStep;
+    public int getXStep() {
+        return xStep;
+    }
+
+    public int getYStep() {
+        return yStep;
     }
 
     public Point getMin() {

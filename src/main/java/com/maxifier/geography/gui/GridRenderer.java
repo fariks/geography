@@ -90,17 +90,13 @@ public class GridRenderer {
 
     private JFreeChart createChart(XYDataset dataset, Grid grid) {
         NumberAxis xAxis = new NumberAxis("x Axis");
-        /*xAxis.setAutoRange(false);
-        xAxis.setRange(0, N);*/
         NumberAxis yAxis = new NumberAxis("y Axis");
-        /*yAxis.setAutoRange(false);
-        yAxis.setRange(0, M);*/
         XYPlot plot = new XYPlot(dataset, xAxis, yAxis, null);
         XYBlockRenderer r = new XYBlockRenderer();
         SpectrumPaintScale ps = new SpectrumPaintScale(grid.getMinHeight(), grid.getMaxHeight());
         r.setPaintScale(ps);
-        r.setBlockHeight(grid.getGridStep());
-        r.setBlockWidth(grid.getGridStep());
+        r.setBlockHeight(grid.getYStep());
+        r.setBlockWidth(grid.getXStep());
         plot.setRenderer(r);
 
         JFreeChart chart = new JFreeChart("Grid",

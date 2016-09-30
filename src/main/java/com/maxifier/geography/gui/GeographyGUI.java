@@ -1,4 +1,4 @@
-package com.maxifier.geography;/*
+package com.maxifier.geography.gui;/*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
@@ -7,7 +7,6 @@ package com.maxifier.geography;/*
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -21,6 +20,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import com.maxifier.geography.GeographyModule;
 import com.maxifier.geography.gui.GridRenderer;
 import com.maxifier.geography.interpolation.model.Grid;
 import com.maxifier.geography.interpolation.GridInterpolator;
@@ -48,6 +48,12 @@ public class GeographyGUI extends javax.swing.JFrame {
         this.gridRenderer = injector.getInstance(GridRenderer.class);
         this.gridInterpolator = injector.getInstance(GridInterpolator.class);
         initComponents();
+        setResizable(false);
+        NonNegativeIntegerInputVerifier nonNegativeIntegerInputVerifier = new NonNegativeIntegerInputVerifier();
+        gridStepXTextField.setInputVerifier(nonNegativeIntegerInputVerifier);
+        gridStepYTextField.setInputVerifier(nonNegativeIntegerInputVerifier);
+        neighborCountTextField.setInputVerifier(nonNegativeIntegerInputVerifier);
+        searchRadiousTextField.setInputVerifier(nonNegativeIntegerInputVerifier);
     }
 
     /**
@@ -65,28 +71,30 @@ public class GeographyGUI extends javax.swing.JFrame {
         boundariesLabel = new javax.swing.JLabel();
         boundariesTextField = new javax.swing.JTextField();
         boundariesButton = new javax.swing.JButton();
-        gridStepTextField = new javax.swing.JTextField();
+        gridStepXTextField = new javax.swing.JTextField();
         launchButton = new javax.swing.JButton();
         gridStepLabel = new javax.swing.JLabel();
-        interpolationProgressBar = new javax.swing.JProgressBar();
-        interpolationProgressBar.setPreferredSize(new Dimension(250,20));
-        interpolationProgressBar.setMaximumSize(new Dimension(250,20));
+        neighborCountLabel = new javax.swing.JLabel();
+        neighborCountTextField = new javax.swing.JTextField();
+        searchRadiusLabel = new javax.swing.JLabel();
+        searchRadiousTextField = new javax.swing.JTextField();
+        gridStepYLabel = new javax.swing.JLabel();
+        gridStepXLabel = new javax.swing.JLabel();
+        gridStepYTextField = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
+        setLocationByPlatform(true);
 
-        probeDataLabel.setText("Data");
+        probeDataLabel.setText("Probe Data");
 
         probeDataTextField.setEnabled(false);
-        probeDataTextField.setPreferredSize(new Dimension(300,20));
-        probeDataTextField.setMaximumSize(new Dimension(300,20));
         probeDataTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 probeDataTextFieldActionPerformed(evt);
             }
         });
 
-        probeDataButton.setText("Browse");
+        probeDataButton.setText("Choose");
         probeDataButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 probeDataButtonActionPerformed(evt);
@@ -96,15 +104,13 @@ public class GeographyGUI extends javax.swing.JFrame {
         boundariesLabel.setText("Boundaries");
 
         boundariesTextField.setEnabled(false);
-        boundariesTextField.setPreferredSize(new Dimension(300,20));
-        boundariesTextField.setMaximumSize(new Dimension(300,20));
         boundariesTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 boundariesTextFieldActionPerformed(evt);
             }
         });
 
-        boundariesButton.setText("Browse");
+        boundariesButton.setText("Choose");
         boundariesButton.setActionCommand("");
         boundariesButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -112,15 +118,15 @@ public class GeographyGUI extends javax.swing.JFrame {
             }
         });
 
-        gridStepTextField.setHorizontalAlignment(javax.swing.JTextField.TRAILING);
-        gridStepTextField.setText("1");
-        gridStepTextField.addActionListener(new java.awt.event.ActionListener() {
+        gridStepXTextField.setHorizontalAlignment(javax.swing.JTextField.TRAILING);
+        gridStepXTextField.setText("1");
+        gridStepXTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                gridStepTextFieldActionPerformed(evt);
+                gridStepXTextFieldActionPerformed(evt);
             }
         });
 
-        launchButton.setText(START);
+        launchButton.setText("Start");
         launchButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 launchButtonActionPerformed(evt);
@@ -128,6 +134,28 @@ public class GeographyGUI extends javax.swing.JFrame {
         });
 
         gridStepLabel.setText("Grid Step");
+
+        neighborCountLabel.setText("Neighbor Count");
+
+        neighborCountTextField.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        neighborCountTextField.setText("3");
+
+        searchRadiusLabel.setText("Search Radius");
+
+        searchRadiousTextField.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        searchRadiousTextField.setText("5");
+
+        gridStepYLabel.setText("y");
+
+        gridStepXLabel.setText("x");
+
+        gridStepYTextField.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        gridStepYTextField.setText("1");
+        gridStepYTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                gridStepYTextFieldActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -137,61 +165,77 @@ public class GeographyGUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(probeDataLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(boundariesLabel))
-                        .addGap(17, 17, 17))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(gridStepLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(gridStepTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(neighborCountLabel)
+                            .addComponent(gridStepLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(19, 19, 19)
+                        .addComponent(gridStepXLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 6, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(neighborCountTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(gridStepXTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(18, 18, 18)
-                        .addComponent(interpolationProgressBar, javax.swing.GroupLayout.DEFAULT_SIZE, 163, Short.MAX_VALUE))
-                    .addComponent(probeDataTextField)
-                    .addComponent(boundariesTextField))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(gridStepYLabel)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(gridStepYTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(searchRadiusLabel)
+                                .addGap(18, 18, 18)
+                                .addComponent(searchRadiousTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(0, 15, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(probeDataLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(boundariesLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(boundariesTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 235, Short.MAX_VALUE)
+                            .addComponent(probeDataTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 235, Short.MAX_VALUE))))
                 .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(boundariesButton)
-                    .addComponent(probeDataButton)
-                    .addComponent(launchButton, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(75, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(probeDataButton, javax.swing.GroupLayout.DEFAULT_SIZE, 81, Short.MAX_VALUE)
+                    .addComponent(boundariesButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(launchButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE, false)
-                        .addComponent(probeDataButton, javax.swing.GroupLayout.DEFAULT_SIZE, 26, Short.MAX_VALUE)
-                        .addComponent(probeDataLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(probeDataTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(3, 3, 3)))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(probeDataLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(probeDataButton, javax.swing.GroupLayout.DEFAULT_SIZE, 30, Short.MAX_VALUE)
+                    .addComponent(probeDataTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 30, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(boundariesLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(boundariesButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(boundariesTextField, javax.swing.GroupLayout.Alignment.TRAILING))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(boundariesButton, javax.swing.GroupLayout.DEFAULT_SIZE, 30, Short.MAX_VALUE)
+                    .addComponent(boundariesTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 30, Short.MAX_VALUE)
+                    .addComponent(boundariesLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(launchButton)
-                    .addComponent(interpolationProgressBar, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(gridStepTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(gridStepLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(45, 45, 45))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(launchButton, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(neighborCountLabel)
+                    .addComponent(neighborCountTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(searchRadiusLabel)
+                    .addComponent(searchRadiousTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(gridStepLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(gridStepXTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(gridStepYLabel)
+                    .addComponent(gridStepXLabel)
+                    .addComponent(gridStepYTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(27, 27, 27))
         );
-        setResizable(false);
+
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void gridStepTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_gridStepTextFieldActionPerformed
+    private void gridStepXTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_gridStepXTextFieldActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_gridStepTextFieldActionPerformed
+    }//GEN-LAST:event_gridStepXTextFieldActionPerformed
 
     private void probeDataTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_probeDataTextFieldActionPerformed
         // TODO add your handling code here:
@@ -239,13 +283,20 @@ public class GeographyGUI extends javax.swing.JFrame {
                             System.out.println(boundaries);
 
                             Polygon polygon = new Polygon(boundaries);
-                            int h = Integer.parseInt(gridStepTextField.getText());
-                            Grid interpolatedGrid = gridInterpolator.interpolate(new Grid(probeData, polygon, h));
+                            int xStep = Integer.parseInt(gridStepXTextField.getText());
+                            int yStep = Integer.parseInt(gridStepYTextField.getText());
+                            int neighborCount = Integer.parseInt(neighborCountTextField.getText());
+                            int searchRadius = Integer.parseInt(searchRadiousTextField.getText());
+                            Grid interpolatedGrid = gridInterpolator.interpolate(
+                                    new Grid(probeData, polygon, xStep, yStep),
+                                    neighborCount,
+                                    searchRadius
+                            );
                             gridRenderer.render(interpolatedGrid);
-                        } catch (NumberFormatException e) {
+                        } catch (IllegalArgumentException e) {
                             JOptionPane.showMessageDialog(
                                     this,
-                                    "Grid step must be integer",
+                                    e.getMessage(),
                                     "Error",
                                     JOptionPane.ERROR_MESSAGE
                             );
@@ -284,6 +335,10 @@ public class GeographyGUI extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_launchButtonActionPerformed
+
+    private void gridStepYTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_gridStepYTextFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_gridStepYTextFieldActionPerformed
 
     /**
      * @param args the command line arguments
@@ -324,11 +379,40 @@ public class GeographyGUI extends javax.swing.JFrame {
     private javax.swing.JLabel boundariesLabel;
     private javax.swing.JTextField boundariesTextField;
     private javax.swing.JLabel gridStepLabel;
-    private javax.swing.JTextField gridStepTextField;
-    private javax.swing.JProgressBar interpolationProgressBar;
+    private javax.swing.JLabel gridStepXLabel;
+    private javax.swing.JTextField gridStepXTextField;
+    private javax.swing.JLabel gridStepYLabel;
+    private javax.swing.JTextField gridStepYTextField;
     private javax.swing.JButton launchButton;
+    private javax.swing.JLabel neighborCountLabel;
+    private javax.swing.JTextField neighborCountTextField;
     private javax.swing.JButton probeDataButton;
     private javax.swing.JLabel probeDataLabel;
     private javax.swing.JTextField probeDataTextField;
+    private javax.swing.JTextField searchRadiousTextField;
+    private javax.swing.JLabel searchRadiusLabel;
     // End of variables declaration//GEN-END:variables
+
+    static class NonNegativeIntegerInputVerifier extends InputVerifier {
+        @Override
+        public boolean verify(JComponent input) {
+            String text = ((JTextField) input).getText();
+            try {
+                int value = Integer.parseInt(text);
+                return value >= 0;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+
+        @Override
+        public boolean shouldYieldFocus(JComponent input) {
+            boolean valid = verify(input);
+            if (!valid) {
+                JOptionPane.showMessageDialog(null, "Field should contain non negative integer value");
+            }
+            return valid;
+        }
+    }
 }
+

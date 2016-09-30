@@ -63,14 +63,14 @@ public class GridCSVHelper {
         CSVPrinter printer = null;
         try {
             printer = new CSVPrinter(new FileWriter(fileName), CSVFormat.DEFAULT.withDelimiter(';'));
-            printer.printRecord(grid.getGridStep());
+            printer.printRecord(grid.getXStep(), grid.getYStep());
             Point min = grid.getMin();
             Point max = grid.getMax();
             Map<Point, Double> data = grid.getData();
             printer.printRecord(min.getX());
             printer.printRecord(min.getY());
-            for (int i = min.getX(); i <= max.getX(); i += grid.getGridStep()) {
-                for (int j = min.getY(); j <= max.getY(); j += grid.getGridStep()) {
+            for (int i = min.getX(); i <= max.getX(); i += grid.getXStep()) {
+                for (int j = min.getY(); j <= max.getY(); j += grid.getYStep()) {
                     Double value = data.get(new Point(i, j));
                     if (value != null) {
                         printer.print(String.format("%.2f", value));

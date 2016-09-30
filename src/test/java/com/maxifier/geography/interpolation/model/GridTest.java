@@ -5,8 +5,6 @@ import static com.google.common.collect.Lists.*;
 import static com.maxifier.geography.GeographyModule.*;
 import static org.junit.Assert.*;
 
-import com.maxifier.geography.GeographyModule;
-
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -23,7 +21,7 @@ public class GridTest {
         Polygon polygon = new Polygon(
                 newArrayList(new Point(-1, 1), new Point(2, 0), new Point(2, -2), new Point(-1, -3))
         );
-        Grid grid = new Grid(data, polygon, 1);
+        Grid grid = new Grid(data, polygon, 1, 1);
 
         assertEquals(new Point(-1,-3), grid.getMin());
         assertEquals(new Point(2,1), grid.getMax());
