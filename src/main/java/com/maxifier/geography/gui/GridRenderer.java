@@ -55,10 +55,8 @@ public class GridRenderer {
 
     private void addSaveAsCSVMenuItem(JFrame frame, JPopupMenu popup, Grid grid) {
         for (MenuElement element : popup.getSubElements()) {
-            System.out.println(element.getClass());
             if (element instanceof JMenu) {
                 JMenu menu = (JMenu) element;
-                System.out.println(menu.getText());
                 if ("Save as".equals(menu.getText())) {
                     JMenuItem csvMenuItem = new JMenuItem("CSV...");
                     csvMenuItem.setActionCommand("SAVE_AS_CSV");

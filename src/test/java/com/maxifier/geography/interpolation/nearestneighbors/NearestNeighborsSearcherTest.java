@@ -13,9 +13,6 @@ import org.junit.Test;
 
 import java.util.List;
 
-/**
- * Created by alsm0813 on 30.09.2016.
- */
 public class NearestNeighborsSearcherTest {
 
     private Injector injector = Guice.createInjector(new GeographyModule());

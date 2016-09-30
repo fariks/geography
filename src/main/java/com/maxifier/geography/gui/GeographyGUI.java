@@ -277,11 +277,7 @@ public class GeographyGUI extends javax.swing.JFrame {
                     runningTask = executorService.submit((Runnable) () -> {
                         try {
                             Map<Point, Double> probeData = gridCSVHelper.read3DGrid(probeDataTextField.getText());
-                            System.out.println(probeData);
-
                             List<Point> boundaries = gridCSVHelper.read2DGrid(boundariesTextField.getText());
-                            System.out.println(boundaries);
-
                             Polygon polygon = new Polygon(boundaries);
                             int xStep = Integer.parseInt(gridStepXTextField.getText());
                             int yStep = Integer.parseInt(gridStepYTextField.getText());
